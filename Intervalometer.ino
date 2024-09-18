@@ -159,6 +159,9 @@ void setup() {
   M5Cardputer.begin(cfg, true);
   //Set the IR LED pin as an output!
   pinMode(IRledPin, OUTPUT);
+  //Configure speaker for beeping later
+  M5Cardputer.Speaker.begin();
+  M5Cardputer.Speaker.setVolume(30);
   Serial.begin(9600);
   current_state = ST_READING_VALUES;
 }
@@ -272,6 +275,8 @@ String start_single_shot() {
       //Send IR pulses/codes to trigger camera shutter release!
       TakePhoto();
       show_single_shot_info();
+      M5.Speaker.tone(4000, 20);
+      
     }
   }
   return (key);
@@ -336,9 +341,18 @@ void loop() {
           M5.Lcd.setCursor(0, 0);
           M5.Lcd.setTextColor(GREEN);
           M5.Lcd.printf("\n  FINISHED!\n\n PRESS A KEY!");
-          current_state = ST_READING_VALUES;
+          //Sound tones to alert user to completion.                    
+          for (int i=0; i<3; i++)
+          {
+            M5.Speaker.tone(6000, 400);
+            delay (400);           
+            M5.Speaker.tone(4000, 400);
+            delay (400);           
+          }
           screen_on();
           check_key(-1);
+          current_state = ST_READING_VALUES;
+
         }
       }
     }
@@ -567,7 +581,6 @@ void TakePhoto() {
   SendMinoltaCode();
   delay(SEND_DELAY);
   SendSonyCode();
-
   sei();  //Reenable interrupts
 }
 
